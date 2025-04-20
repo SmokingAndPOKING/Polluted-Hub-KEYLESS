@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Polluted Hub BETA V1.1.0",
+   Name = "Polluted Hub BETA V1.2.0",
    Icon = 0,
    LoadingTitle = "Polluted",
    LoadingSubtitle = "KEYLESS",
@@ -33,6 +33,20 @@ local Window = Rayfield:CreateWindow({
       Key = {"Hello"}
    }
 })
+
+-- 🌟 Play Peaceful Sound for 3 seconds when GUI Loads
+local peacefulSoundId = "rbxassetid://1848354536"  -- Relaxed Scene (Example peaceful sound)
+local peacefulSound = Instance.new("Sound")
+peacefulSound.SoundId = peacefulSoundId
+peacefulSound.Volume = 0.3  -- Adjust volume as needed
+peacefulSound.Looped = false  -- Set to false so it doesn't loop
+peacefulSound.Parent = game.Players.LocalPlayer.PlayerGui
+peacefulSound:Play()
+
+-- Stop the sound after 3 seconds using delay
+delay(4.1, function()
+    peacefulSound:Stop()
+end)
 
 local function LoadScript(url)
     local success, scriptContent = pcall(function()
@@ -306,14 +320,12 @@ Tab7:CreateButton({ Name = "Fly Gui V3", Callback = function() LoadScript("https
 Tab7:CreateButton({ Name = "Dex Explorer", Callback = function() LoadScript("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua") end })
 Tab7:CreateButton({ Name = "Infinite Yield", Callback = function() LoadScript("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source") end })
 
--- 🌟 Tab 1 - Dead Rails Scripts
-local Tab1 = Window:CreateTab("Dead Rails Scripts", 4483362458)
-local Section1 = Tab1:CreateSection("Useful Scripts")
+-- 🌟 Tab 10 - Arsenal
+local Tab10 = Window:CreateTab("Arsenal", 4483362458)
+local Section10 = Tab10:CreateSection("Arsenal")
 
-Tab1:CreateButton({ Name = "Speed Hub x (HAS KEY)", Callback = function() LoadScript("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua") end })
-Tab1:CreateButton({ Name = "Spider X Hub", Callback = function() LoadScript("https://raw.githubusercontent.com/SpiderScriptRB/Sta1kerH1ck-/refs/heads/main/Dead%20Rails%20SpiderXHub.txt") end })
-Tab1:CreateButton({ Name = "Fly GUI", Callback = function() LoadScript("nothing to load") end })
-Tab1:CreateButton({ Name = "Anti AFK", Callback = function() LoadScript("nothing to load") end })
+Tab10:CreateButton({ Name = "Plutonic", Callback = function() LoadScript("raw.githubusercontent.com/OpposedDev/Plutonic/refs/heads/main/source/loader.lua") end })
+Tab10:CreateButton({ Name = "Quotas", Callback = function() LoadScript("https://raw.githubusercontent.com/Insertl/QuotasHub/main/BETAv1.3") end })
 
 -- 🌟 Tab 2 - Beaks Scripts
 local Tab2 = Window:CreateTab("Beaks ", 4483362458)
@@ -323,6 +335,52 @@ Tab2:CreateButton({ Name = "Mobile Auto Bird", Callback = function() LoadScript(
 Tab2:CreateButton({ Name = "Native (HAS KEY)", Callback = function() LoadScript("https://getnative.cc/script/loader") end })
 Tab2:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 Tab2:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+-- 🌟 Tab 9 - BlueLock Rivals
+local Tab9 = Window:CreateTab("BlueLock", 4483362458)
+local Section9 = Tab9:CreateSection("BlueLock")
+
+Tab9:CreateButton({ Name = "Souls Hub", Callback = function() LoadScript("https://pastebin.com/raw/JLsJfimq") end })
+Tab9:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+-- 🌟 Tab 6 - BloxFruiits
+local Tab6 = Window:CreateTab("BloxFruits", 4483362458)
+local Section6 = Tab6:CreateSection("BloxFruits")
+
+Tab6:CreateButton({ Name = "RedZ", Callback = function() LoadScript("https://raw.githubusercontent.com/newredz/BloxFruits/refs/heads/main/Source.luau") end })
+Tab6:CreateButton({ Name = "AutoFarm Keyless", Callback = function() LoadScript("https://api.realaya.xyz/v1/files/l/73mkp0aqyfo4ypy8hvl0nz10lq49fey5.lua") end })
+
+-- 🌟 Tab 11 - Combat Warrior
+local Tab11 = Window:CreateTab("Combat Warriors", 4483362458)
+local Section11 = Tab11:CreateSection("Combat Warriors")
+
+Tab11:CreateButton({ Name = "Lumin (KeyLess)", Callback = function() LoadScript("https://lumin-hub.lol/cw.lua") end })
+Tab11:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+-- 🌟 Tab 8 - DigIt
+local Tab8 = Window:CreateTab("DigIt", 4483362458)
+local Section8 = Tab8:CreateSection("DigIt")
+
+Tab8:CreateButton({ Name = "CupPink", Callback = function() LoadScript("raw.githubusercontent.com/CupPink/scripts/main/Loader.lua") end })
+Tab8:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+
+-- 🌟 Tab 1 - Dead Rails Scripts
+local Tab1 = Window:CreateTab("Dead Rails Scripts", 4483362458)
+local Section1 = Tab1:CreateSection("Useful Scripts")
+
+Tab1:CreateButton({ Name = "Speed Hub x (HAS KEY)", Callback = function() LoadScript("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua") end })
+Tab1:CreateButton({ Name = "Spider X Hub", Callback = function() LoadScript("https://raw.githubusercontent.com/SpiderScriptRB/Sta1kerH1ck-/refs/heads/main/Dead%20Rails%20SpiderXHub.txt") end })
+Tab1:CreateButton({ Name = "Fly GUI", Callback = function() LoadScript("nothing to load") end })
+Tab1:CreateButton({ Name = "Anti AFK", Callback = function() LoadScript("nothing to load") end })
+ 
+-- 🌟 Tab 5 - Fisch
+local Tab5 = Window:CreateTab("Fisch", 4483362458)
+local Section5 = Tab5:CreateSection("Fisch Scripts")
+
+Tab5:CreateButton({ Name = "Native", Callback = function() LoadScript("https://raw.githubusercontent.com/FischScripts/FischHub/main/FischGui.lua") end })
+Tab5:CreateButton({ Name = "Lunor", Callback = function() LoadScript("'https://lunor.dev/loader") end })
+Tab5:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 
 -- 🌟 Tab 3 - PetSim/PetsGo
 local Tab3 = Window:CreateTab("PetSim/PetsGo", 4483362458)
@@ -340,15 +398,22 @@ Tab4:CreateButton({ Name = "Blitz", Callback = function() LoadScript("https://ra
 Tab4:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 Tab4:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 
--- 🌟 Tab 5 - Fisch
-local Tab5 = Window:CreateTab("Fisch", 4483362458)
-local Section5 = Tab5:CreateSection("Fisch Scripts")
+-- 🌟 Tab 12- Rivals
+local Tab12 = Window:CreateTab("Rivals", 4483362458)
+local Section12 = Tab12:CreateSection("Rivals Scripts")
 
-Tab5:CreateButton({ Name = "Native", Callback = function() LoadScript("https://raw.githubusercontent.com/FischScripts/FischHub/main/FischGui.lua") end })
-Tab5:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("mothing to load") end })
-Tab5:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+Tab12:CreateButton({ Name = "BlackOwl", Callback = function() LoadScript("https://raw.githubusercontent.com/blackowl1231/ZYPHERION/refs/heads/main/main.lua") end })
+Tab12:CreateButton({ Name = "Tbao", Callback = function() LoadScript("https://raw.githubusercontent.com/tbao143/game/refs/heads/main/TbaoHubBlueLockRivals") end })
+Tab12:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("") end })
 
--- 🌟 Tab 6 - Settings
+-- 🌟 Tab 13 - Slap Battles
+local Tab13 = Window:CreateTab("SlapBattles", 4483362458)
+local Section13 = Tab8:CreateSection("SlapBattles")
+
+Tab13:CreateButton({ Name = "SlapBattles KeyLess", Callback = function() LoadScript("https://rawscripts.net/raw/Slap-Battles-Open-source-for-9484") end })
+Tab13:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+-- 🌟 Tab 7- Settings
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
 local SettingsSection = SettingsTab:CreateSection("Performance")
 
@@ -410,7 +475,179 @@ SettingsTab:CreateSlider({
     end
 })
 
+-- 🌟 Create a new section called "Misc Settings"
+local MiscSettingsSection = SettingsTab:CreateSection("Misc Settings")
 
+-- 🌟 Variable to store the current sound instance, volume, and repeat status
+local currentSound
+local currentVolume = 0.5  -- Default volume set to 50% (0.5)
+local repeatEnabled = false  -- Flag to track if repeat mode is enabled
+
+-- 🌟 Create Input for Music ID using RayField's CreateInput method
+SettingsTab:CreateInput({
+    Name = "Music ID", 
+    Default = "",  -- Default value for the input box (empty string)
+    PlaceholderText = "Enter Music ID here",  -- Placeholder text
+    TextDisappear = true,  -- Placeholder disappears when typing
+    Callback = function(MusicID)
+        -- Example blacklisted music IDs
+        local BlacklistedMusicIDs = {"123456", "654321"}  -- Add your actual blacklisted IDs here
+
+        -- Check if the music ID is blacklisted
+        for _, blacklistedID in pairs(BlacklistedMusicIDs) do
+            if MusicID == blacklistedID then
+                Rayfield:Notify({
+                    Title = "🚫 Song Blacklisted",
+                    Content = "This song ID is blacklisted.",
+                    Duration = 5
+                })
+                return
+            end
+        end
+
+        -- Check if the MusicID is valid (must be numeric and non-empty)
+        if not MusicID or MusicID == "" or not tonumber(MusicID) then
+            Rayfield:Notify({
+                Title = "🚫 Invalid Song ID",
+                Content = "U FUCKING MORON THIS IS NOT A SONG ID",
+                Duration = 5
+            })
+            return
+        end
+
+        -- If not blacklisted or invalid, attempt to play the song
+        local success, message = pcall(function()
+            playMusic(MusicID)  -- Call the playMusic function to play the song
+        end)
+
+        if success then
+            Rayfield:Notify({
+                Title = "🎶 Song Playing",
+                Content = "Now playing song with ID: " .. MusicID,
+                Duration = 5
+            })
+        else
+            Rayfield:Notify({
+                Title = "⚠️ Error",
+                Content = "Failed to play the song.",
+                Duration = 5
+            })
+        end
+    end
+})
+
+-- 🌟 Create Slider for Volume Control
+SettingsTab:CreateSlider({
+    Name = "Volume",
+    Range = {0, 100},  -- Volume range from 0 to 100
+    Increment = 1,     -- Increment by 1
+    Suffix = "%",
+    CurrentValue = 50, -- Default volume set to 50%
+    Callback = function(Value)
+        -- Update the current volume setting
+        currentVolume = Value / 100  -- Convert to a range of 0-1 for volume setting
+
+        -- Apply the volume to the current sound if it exists
+        if currentSound then
+            currentSound.Volume = currentVolume  -- Set the volume of the current sound object
+        end
+
+        -- Notify user about volume change
+        Rayfield:Notify({
+            Title = "🔊 Volume Set",
+            Content = "Volume has been set to " .. tostring(Value) .. "%",
+            Duration = 5
+        })
+    end
+})
+
+-- 🌟 Create Stop Button to Stop the Music
+SettingsTab:CreateButton({
+    Name = "Stop Music",
+    Callback = function()
+        stopMusic()  -- Call the stopMusic function when the button is clicked
+    end
+})
+
+-- 🌟 Create Repeat Button to Toggle Repeat Mode
+SettingsTab:CreateButton({
+    Name = "Toggle Repeat",
+    Callback = function()
+        repeatEnabled = not repeatEnabled  -- Toggle the repeat flag
+        local status = repeatEnabled and "enabled" or "disabled"
+        
+        Rayfield:Notify({
+            Title = "🔁 Repeat Mode " .. status,
+            Content = "Repeat mode has been " .. status .. ".",
+            Duration = 5
+        })
+    end
+})
+
+-- 🌟 Function to play music (Locally for the Player)
+function playMusic(MusicID)
+    -- Check if the MusicID is valid
+    print("Attempting to play music with ID: " .. MusicID)
+
+    -- Assuming we're using a Roblox Sound object to play music
+    local sound = Instance.new("Sound")  -- Create a new Sound object
+    sound.SoundId = "rbxassetid://" .. MusicID  -- Set the sound ID to the provided MusicID
+    sound.Volume = currentVolume  -- Set the volume to the currently selected volume
+    sound.Parent = game.Players.LocalPlayer.PlayerGui  -- Parent the sound to the local player’s PlayerGui
+
+    -- Store the sound object in the global variable to stop it later
+    currentSound = sound
+
+    -- Debugging message
+    print("Sound ID is: " .. sound.SoundId)
+    print("Sound volume set to: " .. sound.Volume)
+
+    -- Play the sound
+    sound:Play()
+
+    -- Wait for the sound to load completely before accessing the duration
+    sound.Loaded:Wait()  -- Wait until the sound is loaded
+
+    -- Show a notification with the song's duration
+    local duration = math.floor(sound.TimeLength)  -- Duration in seconds
+    local minutes = math.floor(duration / 60)
+    local seconds = duration % 60
+    local timeString = string.format("%02d:%02d", minutes, seconds)
+    Rayfield:Notify({
+        Title = "⏱️ Song Duration",
+        Content = "Song will play for: " .. timeString,
+        Duration = 5
+    })
+
+    -- Handle repeat mode
+    sound.Ended:Connect(function()
+        if repeatEnabled then
+            print("Repeat is enabled, playing the song again.")
+            playMusic(MusicID)  -- Replay the song
+        end
+    end)
+end
+
+-- 🌟 Function to stop the currently playing music
+function stopMusic()
+    -- Check if there is a sound currently playing
+    if currentSound and currentSound.IsPlaying then
+        currentSound:Stop()  -- Stop the sound
+        Rayfield:Notify({
+            Title = "⏹️ Music Stopped",
+            Content = "The music has been stopped.",
+            Duration = 5
+        })
+        print("Music has been stopped.")
+    else
+        Rayfield:Notify({
+            Title = "⚠️ No Music Playing",
+            Content = "There is no music currently playing to stop.",
+            Duration = 5
+        })
+        print("No music is currently playing.")
+    end
+end
 
 -- 🌟 Keep the Watermark (FPS, Ping, Time, Uptime) Code Separate at the Bottom
 do
