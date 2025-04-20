@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Polluted Hub V1.1.0 Beta",
+   Name = "Polluted Hub BETA V1.1.0",
    Icon = 0,
    LoadingTitle = "Polluted",
    LoadingSubtitle = "KEYLESS",
@@ -503,19 +503,68 @@ SettingsTab:CreateInput({
     end
 })
 
+--- Webhook Input for Join Logger
 SettingsTab:CreateInput({
-    Name = "Join Logger Webhook",
-    PlaceholderText = "Paste your backup webhook...",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Text)
-        backupWebhook = Text
-        Rayfield:Notify({
-            Title = "✅ Webhook Saved",
-            Content = "Join logger webhook URL set.",
-            Duration = 4
-        })
+        Name = "Join Logger Webhook",
+        PlaceholderText = "Paste your backup webhook...",
+        RemoveTextAfterFocusLost = false,
+        Callback = function(Text)
+            backupWebhook = Text
+            Rayfield:Notify({
+                Title = "✅ Webhook Saved",
+                Content = "Join logger webhook URL set.",
+                Duration = 4
+            })
+        end
+    })
+    
+    -- Function to send messages to the webhook using http_request
+    local function sendToWebhook(message)
+        if not backupWebhook then
+            warn("No webhook URL provided.")
+            return
+        end
+    
+        local data = {
+            ["content"] = message
+        }
+    
+        local jsonData = game:GetService("HttpService"):JSONEncode(data)
+    
+        local headers = {
+            ["Content-Type"] = "application/json"
+        }
+    
+        -- Send HTTP request to webhook URL using http_request
+        local success, errorMessage = pcall(function()
+            -- Send the request
+            local response = http_request({
+                Url = backupWebhook,
+                Method = "POST",
+                Headers = headers,
+                Body = jsonData
+            })
+        end)
+    
+        -- Error handling if the webhook request fails
+        if not success then
+            warn("Failed to send to webhook: " .. errorMessage)
+        end
     end
-})
+    
+    -- Event for when a player joins the game
+    game.Players.PlayerAdded:Connect(function(player)
+        local message = player.Name .. " has joined the game."
+        sendToWebhook(message)
+    end)
+    
+    -- Event for when a player leaves the game
+    game.Players.PlayerRemoving:Connect(function(player)
+        local message = player.Name .. " has left the game."
+        sendToWebhook(message)
+    end)
+    
+    
 
 SettingsTab:CreateButton({
     Name = "🧪 Test Chat Logger",
