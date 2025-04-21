@@ -2,7 +2,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Polluted Hub BETA Dev Build V1.3.0",
+   Name = "Polluted Hub BETA Build V1.3.0",
    Icon = 0,
    LoadingTitle = "Polluted",
    LoadingSubtitle = "Made By Smoking&Poking",
