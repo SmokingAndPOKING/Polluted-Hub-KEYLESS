@@ -1,19 +1,20 @@
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Polluted Hub BETA V1.2.0",
+   Name = "Polluted Hub BETA Dev Build V1.3.0",
    Icon = 0,
    LoadingTitle = "Polluted",
-   LoadingSubtitle = "KEYLESS",
+   LoadingSubtitle = "Made By Smoking&Poking",
    Theme = "Bloom",
 
    DisableRayfieldPrompts = false,
    DisableBuildWarnings = false,
 
    ConfigurationSaving = {
-      Enabled = true,
-      FolderName = nil,
-      FileName = "Big Hub"
+      Enabled = false,
+      FolderName = Polluted,
+      FileName = "Polluted"
    },
 
    Discord = {
@@ -22,15 +23,15 @@ local Window = Rayfield:CreateWindow({
       RememberJoins = true
    },
 
-   KeySystem = false,
+   KeySystem = true,
    KeySettings = {
-      Title = "Untitled",
-      Subtitle = "Key System",
-      Note = "No method of obtaining the key is provided",
+      Title = "Polluted V1.3.0",
+      Subtitle = "Key Validation",
+      Note = "Join Discord For Key",
       FileName = "Key",
-      SaveKey = true,
+      SaveKey = false,
       GrabKeyFromSite = false,
-      Key = {"Hello"}
+      Key = {"Testing"}
    }
 })
 
@@ -72,9 +73,162 @@ local function LoadScript(url)
     end
 end
 
+-- 🌟 Tab 14 - User Info
+local Tab14 = Window:CreateTab("User Info", 4483362458)
+
+-- ℹ️ Info section
+Tab14:CreateSection("Info")
+
+-- 👤 Username button (does nothing)
+Tab14:CreateButton({
+    Name = "Username: " .. game.Players.LocalPlayer.Name,
+    Callback = function()
+        -- no action
+    end
+})
+
+-- 🧠 Executor Detection
+local executorName = identifyexecutor and identifyexecutor()
+    or (KRNL_LOADED and "KRNL")
+    or (is_sirhurt_closure and "SirHurt")
+    or (syn and "Synapse X")
+    or (secure_load and "Sentinel")
+    or (getexecutorname and getexecutorname())
+    or (getidentity and "ScriptWare")
+    or "Unknown"
+
+-- 👀 Mobile Executor Guess (extra layer)
+if (executorName == "Unknown") and (getfflag or ismobileclient or ismobile or identifyexecutor == nil) then
+    if (identifyexecutor == nil and getexecutorname == nil) then
+        executorName = "Likely Mobile (Delta/Fluxus/Arceus X)"
+    end
+end
+
+-- 🧪 Executor button (still does nothing)
+Tab14:CreateButton({
+    Name = "Executor: " .. executorName,
+    Callback = function()
+        -- no action
+    end
+})
+
+-- 🕰️ Date and Time button (showing time of execution)
+local executionTime = os.date("%Y-%m-%d %H:%M:%S")  -- Get the current time of script execution
+
+-- Create the button with execution time
+local timeButton = Tab14:CreateButton({
+    Name = "Execution Time: " .. executionTime,
+    Callback = function()
+        -- no action
+    end
+})
+
+-- 🟢 New Button (shows Roblox version status)
+local function checkRobloxVersion()
+    -- Manually set the Roblox version status based on the provided version string
+    local currentRobloxVersion = "version-1e91b4133e334c9c"  -- Your current Roblox version string
+    local latestRobloxVersion = "version-1e91b4133e334c9c"  -- This would be the latest known version (same in this case)
+
+    -- Check if the current version matches the latest version
+    if currentRobloxVersion == latestRobloxVersion then
+        return "✔️ Roblox is up to date"
+    else
+        return "❌ Roblox version is outdated"
+    end
+end
+
+-- Create the new button with version status
+Tab14:CreateButton({
+    Name = "Roblox Version Status: " .. checkRobloxVersion(),
+    Callback = function()
+        -- no action
+    end
+})
+
+-- 🔲 New Button (shows script version status)
+local function checkScriptVersion()
+    -- Manually set the script's current version
+    local currentScriptVersion = "1.3.0"  -- Your current script version (you can update this manually when needed)
+    local latestScriptVersion = "1.3.0"  -- This would be the latest known script version (change if there's an update)
+
+    -- Compare the versions
+    if currentScriptVersion == latestScriptVersion then
+        return "✔️ Script is up to date"
+    else
+        return "❌ Script version is outdated Latest is 1.3.0 Wait for release or head to discord"
+    end
+end
+
+-- Create the new button with script version status
+Tab14:CreateButton({
+    Name = "Script Version Status: " .. checkScriptVersion(),
+    Callback = function()
+        -- no action
+    end
+})
+
+-- 🌟 Teleports - Main Menu
+local Tab16 = Window:CreateTab("Teleports", 4483362458)
+local Section16 = Tab16:CreateSection("Next Update V1.4.0")
+
+
 -- 🌟 Tab 0 - Main Menu
 local MainMenuTab = Window:CreateTab("Main Menu", 4483362458)
-local MainMenuSection1 = MainMenuTab:CreateSection("Welcome")
+local MainMenuSection1 = MainMenuTab:CreateSection("Debug")
+
+MainMenuTab:CreateButton({Name = "🛠️ Run Debug Scan",
+    Callback = function()
+        local errorsFound = {}
+        local HttpService = game:GetService("HttpService")
+
+        -- Check 1: Validate Webhooks
+        if not mainWebhook or mainWebhook == "" then
+            table.insert(errorsFound, "❌ Chat webhook missing.")
+        end
+        if not backupWebhook or backupWebhook == "" then
+            table.insert(errorsFound, "❌ Log webhook missing.")
+        end
+
+        -- Check 2: HTTP request support
+        local requestFunc = syn and syn.request or http_request or request or (http and http.request)
+        if not requestFunc then
+            table.insert(errorsFound, "❌ HTTP requests not supported.")
+        end
+
+        -- Check 3: setfpscap support
+        if not setfpscap then
+            table.insert(errorsFound, "⚠️ setfpscap not supported.")
+        end
+
+        -- Check 4: Watermark availability
+        if not watermark then
+            table.insert(errorsFound, "❌ Watermark not initialized.")
+        end
+
+        -- Check 5: Essential functions
+        if not stopMusic then
+            table.insert(errorsFound, "❌ stopMusic function missing.")
+        end
+        if not playMusic then
+            table.insert(errorsFound, "❌ playMusic function missing.")
+        end
+
+        -- Format error message
+        local message = ""
+        if #errorsFound == 0 then
+            message = "✅ All systems are functional. No issues detected."
+        else
+            message = table.concat(errorsFound, "\n")
+        end
+
+        -- Show Notification
+        Rayfield:Notify({
+            Title = "🔍 Debug Scan Complete",
+            Content = message,
+            Duration = math.clamp(5 + (#errorsFound * 2), 5, 20)
+        })
+    end
+})
 
 
 
@@ -143,62 +297,6 @@ Tab6:CreateToggle({
                         part.CanCollide = true
                     end
                 end
-            end
-        end
-    end
-})
-
--- 🌟 Fly Toggle (Infinite Yield style fly)
-local flyEnabled = false  -- Default state for fly toggle
-local flyingPart
-local bodyGyro
-local bodyVelocity
-
-Tab6:CreateToggle({
-    Name = "Fly",
-    CurrentValue = flyEnabled,
-    Callback = function(Value)
-        flyEnabled = Value
-        local character = game.Players.LocalPlayer.Character
-        local humanoid = character and character:FindFirstChild("Humanoid")
-
-        if flyEnabled then
-            -- Enable Fly (Infinite Yield Style)
-            if humanoid and not flyingPart then
-                flyingPart = Instance.new("Part")
-                flyingPart.Size = Vector3.new(4, 4, 4)
-                flyingPart.Shape = Enum.PartType.Ball
-                flyingPart.Anchored = false
-                flyingPart.CanCollide = false
-                flyingPart.Position = character.HumanoidRootPart.Position
-                flyingPart.Parent = workspace
-
-                -- Create BodyGyro and BodyVelocity to control flight
-                bodyGyro = Instance.new("BodyGyro")
-                bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-                bodyGyro.CFrame = character.HumanoidRootPart.CFrame
-                bodyGyro.Parent = flyingPart
-
-                bodyVelocity = Instance.new("BodyVelocity")
-                bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                bodyVelocity.Parent = flyingPart
-
-                -- Attach flyingPart to the HumanoidRootPart
-                game:GetService("RunService").RenderStepped:Connect(function()
-                    if flyEnabled and character:FindFirstChild("HumanoidRootPart") then
-                        flyingPart.CFrame = character.HumanoidRootPart.CFrame
-                        bodyGyro.CFrame = character.HumanoidRootPart.CFrame
-                    end
-                end)
-            end
-        else
-            -- Disable Fly
-            if flyingPart then
-                flyingPart:Destroy()
-                flyingPart = nil
-                bodyGyro = nil
-                bodyVelocity = nil
             end
         end
     end
@@ -327,6 +425,9 @@ local Section10 = Tab10:CreateSection("Arsenal")
 Tab10:CreateButton({ Name = "Plutonic", Callback = function() LoadScript("raw.githubusercontent.com/OpposedDev/Plutonic/refs/heads/main/source/loader.lua") end })
 Tab10:CreateButton({ Name = "Quotas", Callback = function() LoadScript("https://raw.githubusercontent.com/Insertl/QuotasHub/main/BETAv1.3") end })
 
+local Section10_2 = Tab10:CreateSection("New Arsenal Section")
+
+
 -- 🌟 Tab 2 - Beaks Scripts
 local Tab2 = Window:CreateTab("Beaks ", 4483362458)
 local Section2 = Tab2:CreateSection("More Scripts")
@@ -336,6 +437,8 @@ Tab2:CreateButton({ Name = "Native (HAS KEY)", Callback = function() LoadScript(
 Tab2:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 Tab2:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 
+local Section2_2 = Tab2:CreateSection("KeyLess")
+
 -- 🌟 Tab 9 - BlueLock Rivals
 local Tab9 = Window:CreateTab("BlueLock", 4483362458)
 local Section9 = Tab9:CreateSection("BlueLock")
@@ -343,19 +446,36 @@ local Section9 = Tab9:CreateSection("BlueLock")
 Tab9:CreateButton({ Name = "Souls Hub", Callback = function() LoadScript("https://pastebin.com/raw/JLsJfimq") end })
 Tab9:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 
+local Section9_2 = Tab9:CreateSection("KeyLess")
+
 -- 🌟 Tab 6 - BloxFruiits
 local Tab6 = Window:CreateTab("BloxFruits", 4483362458)
 local Section6 = Tab6:CreateSection("BloxFruits")
 
 Tab6:CreateButton({ Name = "RedZ", Callback = function() LoadScript("https://raw.githubusercontent.com/newredz/BloxFruits/refs/heads/main/Source.luau") end })
+
+local Section6_2 = Tab6:CreateSection("KeyLess")
+
 Tab6:CreateButton({ Name = "AutoFarm Keyless", Callback = function() LoadScript("https://api.realaya.xyz/v1/files/l/73mkp0aqyfo4ypy8hvl0nz10lq49fey5.lua") end })
+
+-- 🌟 Tab 8 - CarCrushers2
+local Tab15 =  Window:CreateTab("Car Crushers 2", 4483362458)
+local Section15 = Tab15:CreateSection("CarCrushers")
+
+Tab15:CreateButton({ Name = "Breadido", Callback = function() LoadScript("https://raw.githubusercontent.com/Breadido/main_scripts/main/Car_Crushers_2.lua") end })
+Tab15:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+local Section8_2 = Tab15:CreateSection("KeyLess")
 
 -- 🌟 Tab 11 - Combat Warrior
 local Tab11 = Window:CreateTab("Combat Warriors", 4483362458)
 local Section11 = Tab11:CreateSection("Combat Warriors")
 
-Tab11:CreateButton({ Name = "Lumin (KeyLess)", Callback = function() LoadScript("https://lumin-hub.lol/cw.lua") end })
 Tab11:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+local Section11_2 = Tab11:CreateSection("KeyLess")
+
+Tab11:CreateButton({ Name = "Lumin (KeyLess)", Callback = function() LoadScript("https://lumin-hub.lol/cw.lua") end })
 
 -- 🌟 Tab 8 - DigIt
 local Tab8 = Window:CreateTab("DigIt", 4483362458)
@@ -364,6 +484,7 @@ local Section8 = Tab8:CreateSection("DigIt")
 Tab8:CreateButton({ Name = "CupPink", Callback = function() LoadScript("raw.githubusercontent.com/CupPink/scripts/main/Loader.lua") end })
 Tab8:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 
+local Section8_2 = Tab8:CreateSection("KeyLess")
 
 -- 🌟 Tab 1 - Dead Rails Scripts
 local Tab1 = Window:CreateTab("Dead Rails Scripts", 4483362458)
@@ -371,9 +492,11 @@ local Section1 = Tab1:CreateSection("Useful Scripts")
 
 Tab1:CreateButton({ Name = "Speed Hub x (HAS KEY)", Callback = function() LoadScript("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua") end })
 Tab1:CreateButton({ Name = "Spider X Hub", Callback = function() LoadScript("https://raw.githubusercontent.com/SpiderScriptRB/Sta1kerH1ck-/refs/heads/main/Dead%20Rails%20SpiderXHub.txt") end })
-Tab1:CreateButton({ Name = "Fly GUI", Callback = function() LoadScript("nothing to load") end })
-Tab1:CreateButton({ Name = "Anti AFK", Callback = function() LoadScript("nothing to load") end })
+Tab1:CreateButton({ Name = "Coming soon", Callback = function() LoadScript("nothing to load") end })
+Tab1:CreateButton({ Name = "Coming Soon", Callback = function() LoadScript("nothing to load") end })
  
+local Section1_2 = Tab1:CreateSection("KeyLess")
+
 -- 🌟 Tab 5 - Fisch
 local Tab5 = Window:CreateTab("Fisch", 4483362458)
 local Section5 = Tab5:CreateSection("Fisch Scripts")
@@ -381,6 +504,8 @@ local Section5 = Tab5:CreateSection("Fisch Scripts")
 Tab5:CreateButton({ Name = "Native", Callback = function() LoadScript("https://raw.githubusercontent.com/FischScripts/FischHub/main/FischGui.lua") end })
 Tab5:CreateButton({ Name = "Lunor", Callback = function() LoadScript("'https://lunor.dev/loader") end })
 Tab5:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+local Section5_2 = Tab5:CreateSection("KeyLess")
 
 -- 🌟 Tab 3 - PetSim/PetsGo
 local Tab3 = Window:CreateTab("PetSim/PetsGo", 4483362458)
@@ -390,6 +515,8 @@ Tab3:CreateButton({ Name = "ZapHub (PetSim HAS KEY)", Callback = function() Load
 Tab3:CreateButton({ Name = "ZapHub (PetsGO HAS KEY)", Callback = function() LoadScript("https://zaphub.xyz/Exec") end })
 Tab3:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 
+local Section3_2 = Tab3:CreateSection("KeyLess")
+
 -- 🌟 Tab 4 - JailBreak
 local Tab4 = Window:CreateTab("JailBreak", 4483362458)
 local Section4 = Tab4:CreateSection("JailBreak Scripts")
@@ -397,6 +524,8 @@ local Section4 = Tab4:CreateSection("JailBreak Scripts")
 Tab4:CreateButton({ Name = "Blitz", Callback = function() LoadScript("https://raw.githubusercontent.com/BlitzIsKing/UniversalFarm/main/Loader/Regular") end })
 Tab4:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 Tab4:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+local Section4_2 = Tab4:CreateSection("KeyLess")
 
 -- 🌟 Tab 12- Rivals
 local Tab12 = Window:CreateTab("Rivals", 4483362458)
@@ -406,12 +535,17 @@ Tab12:CreateButton({ Name = "BlackOwl", Callback = function() LoadScript("https:
 Tab12:CreateButton({ Name = "Tbao", Callback = function() LoadScript("https://raw.githubusercontent.com/tbao143/game/refs/heads/main/TbaoHubBlueLockRivals") end })
 Tab12:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("") end })
 
+local Section12_2 = Tab12:CreateSection("KeyLess")
+
 -- 🌟 Tab 13 - Slap Battles
 local Tab13 = Window:CreateTab("SlapBattles", 4483362458)
-local Section13 = Tab8:CreateSection("SlapBattles")
+local Section13 = Tab13:CreateSection("SlapBattles")
+
+Tab13:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
+
+local Section13_2 = Tab13:CreateSection("KeyLess")
 
 Tab13:CreateButton({ Name = "SlapBattles KeyLess", Callback = function() LoadScript("https://rawscripts.net/raw/Slap-Battles-Open-source-for-9484") end })
-Tab13:CreateButton({ Name = "COMING SOON", Callback = function() LoadScript("nothing to load") end })
 
 -- 🌟 Tab 7- Settings
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
@@ -726,24 +860,10 @@ SettingsTab:CreateSection("Webhooks & Discord")
 local mainWebhook = ""
 local backupWebhook = ""
 
-SettingsTab:CreateInput({
-    Name = "Chat Logger Webhook",
-    PlaceholderText = "Paste your main webhook...",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Text)
-        mainWebhook = Text
-        Rayfield:Notify({
-            Title = "✅ Webhook Saved",
-            Content = "Chat logger webhook URL set.",
-            Duration = 4
-        })
-    end
-})
-
 --- Webhook Input for Join Logger
 SettingsTab:CreateInput({
         Name = "Join Logger Webhook",
-        PlaceholderText = "Paste your backup webhook...",
+        PlaceholderText = "Paste your join log webhook...",
         RemoveTextAfterFocusLost = false,
         Callback = function(Text)
             backupWebhook = Text
@@ -801,41 +921,8 @@ SettingsTab:CreateInput({
         sendToWebhook(message)
     end)
     
-    
-
 SettingsTab:CreateButton({
-    Name = "🧪 Test Chat Logger",
-    Callback = function()
-        if mainWebhook and mainWebhook ~= "" then
-            local data = {
-                ["content"] = "✅ Test message from Chat Logger!"
-            }
-            local requestFunc = syn and syn.request or http_request or request or (http and http.request)
-            if requestFunc then
-                local success, result = pcall(function()
-                    return requestFunc({
-                        Url = mainWebhook,
-                        Method = "POST",
-                        Headers = {["Content-Type"] = "application/json"},
-                        Body = HttpService:JSONEncode(data)
-                    })
-                end)
-                if success then
-                    Rayfield:Notify({Title = "Success", Content = "Chat Logger test sent.", Duration = 4})
-                else
-                    Rayfield:Notify({Title = "Error", Content = "Failed to send main webhook test.", Duration = 4})
-                end
-            else
-                Rayfield:Notify({Title = "Unsupported", Content = "HTTP requests not supported.", Duration = 5})
-            end
-        else
-            Rayfield:Notify({Title = "Missing URL", Content = "Chat Logger webhook is not set.", Duration = 4})
-        end
-    end
-})
-
-SettingsTab:CreateButton({
-    Name = "🧪 Test Join Logger",
+    Name = "Test Join Logger",
     Callback = function()
         if backupWebhook and backupWebhook ~= "" then
             local data = {
@@ -862,18 +949,6 @@ SettingsTab:CreateButton({
         else
             Rayfield:Notify({Title = "Missing URL", Content = "Join Logger webhook is not set.", Duration = 4})
         end
-    end
-})
-
-SettingsTab:CreateButton({
-    Name = "📨 Join Discord Server",
-    Callback = function()
-        setclipboard("https://discord.gg/5pvfUNfQ") -- Replace with your real invite
-        Rayfield:Notify({
-            Title = "📋 Link Copied",
-            Content = "Discord invite copied to clipboard!",
-            Duration = 4
-        })
     end
 })
 
@@ -905,3 +980,65 @@ local function reduceEffects()
         end
     end
 end
+
+task.spawn(function()
+    local fpsCounter = 0
+    local lastTime = os.clock()
+
+    while true do
+        RunService.RenderStepped:Wait()
+        fpsCounter += 1
+        local now = os.clock()
+
+        if now - lastTime >= 1 then
+            local fps = fpsCounter
+            local timeSinceLastSwitch = tick() - lastSwitchTime
+
+            if fps < 60 then
+                if not lastWasLow then
+                    lastWasLow = true
+                    reduceEffects()
+                    Rayfield:Notify({
+                        Title = "⚠️ FPS Warning",
+                        Content = "FPS has been decreased. Reducing effects to compensate.",
+                        Duration = 5
+                    })
+                end
+
+                if not qualityReduced and timeSinceLastSwitch >= switchCooldown then
+                    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+                    qualityReduced = true
+                    lastSwitchTime = tick()
+                    Rayfield:Notify({
+                        Title = "⚙️ Quality Reduced",
+                        Content = "Lowered graphics quality to improve FPS.",
+                        Duration = 5
+                    })
+                end
+            else
+                if lastWasLow then
+                    lastWasLow = false
+                    Rayfield:Notify({
+                        Title = "✅ FPS Restored",
+                        Content = "FPS is stable. Restoring performance.",
+                        Duration = 5
+                    })
+                end
+
+                if qualityReduced and timeSinceLastSwitch >= switchCooldown then
+                    settings().Rendering.QualityLevel = originalQuality
+                    qualityReduced = false
+                    lastSwitchTime = tick()
+                    Rayfield:Notify({
+                        Title = "🌟 Quality Restored",
+                        Content = "Graphics quality restored.",
+                        Duration = 5
+                    })
+                end
+            end
+
+            fpsCounter = 0
+            lastTime = now
+        end
+    end
+end)
