@@ -12,8 +12,8 @@ local Window = Rayfield:CreateWindow({
    DisableBuildWarnings = false,
 
    ConfigurationSaving = {
-      Enabled = false,
-      FolderName = Polluted,
+      Enabled = true,
+      FolderName = "Polluted Hub",
       FileName = "Polluted"
    },
 
@@ -169,8 +169,31 @@ Tab14:CreateButton({
 
 -- 🌟 Teleports - Main Menu
 local Tab16 = Window:CreateTab("Teleports", 4483362458)
-local Section16 = Tab16:CreateSection("Next Update V1.4.0")
 
+local Section16 = Tab16:CreateSection("Method Selection")
+
+local Dropdown = Tab16:CreateDropdown({          
+   Name = "Methods",
+   Options = {"Tween","Teleport"},
+   CurrentOption = {"Option 1"},
+   MultipleOptions = false, -- SET TO TRUE TO ENABLE MULTI SELECT
+   Flag = "Dropdown1", 
+   Callback = function(Options)
+   end,
+})
+
+
+local Section16 = Tab16:CreateSection("Teleport To Player/Tween For Some Games")
+
+local Dropdown = Tab16:CreateDropdown({          
+   Name = "Teleport",
+   Options = {"Not Linked To Humanoid","Not Linked To Humanoid"},
+   CurrentOption = {"Option 1"},
+   MultipleOptions = false, -- SET TO TRUE TO ENABLE MULTI SELECT
+   Flag = "Dropdown1", 
+   Callback = function(Options)
+   end,
+})
 
 -- 🌟 Tab 0 - Main Menu
 local MainMenuTab = Window:CreateTab("Main Menu", 4483362458)
@@ -551,6 +574,150 @@ Tab13:CreateButton({ Name = "SlapBattles KeyLess", Callback = function() LoadScr
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
 local SettingsSection = SettingsTab:CreateSection("Performance")
 
+
+
+local peakLuaMemory = 0
+local monitoring = false
+
+-- Threshold in MB (tweak this!)
+local memoryWarningThreshold = 100
+
+SettingsTab:CreateButton({
+    Name = "Ram Debug",
+    Callback = function()
+        -- Get the current Lua memory usage
+        local luaKB = collectgarbage("count")
+        local luaMB = luaKB / 1024
+
+        -- Format the message to display the current memory usage
+        local msg = string.format("Lua memory usage: %.2f MB", luaMB)
+
+        -- Show the notification using Rayfield:Notify
+        Rayfield:Notify({
+            Title = "Ram Debug",
+            Content = msg,
+            Duration = 5
+        })
+    end
+})
+
+local peakLuaMemory = 0
+local monitoring = false
+
+-- Set your warning threshold (in MB)
+local memoryWarningThreshold = 30
+
+-- Start memory monitoring function
+local function startMemoryMonitoring()
+    if monitoring then return end
+
+    monitoring = true
+
+    -- Notify user that memory monitoring has started
+    Rayfield:Notify({
+        Title = "Memory Monitor",
+        Content = "Monitoring Script Memory.",
+        Duration = 6
+    })
+
+    task.spawn(function()
+        while monitoring do
+            -- Get the current Lua memory usage
+            local luaKB = collectgarbage("count")
+            local luaMB = luaKB / 1024
+
+            -- Track the peak memory usage
+            if luaMB > peakLuaMemory then
+                peakLuaMemory = luaMB
+            end
+
+            -- Check if memory usage exceeds the warning threshold
+            if luaMB >= memoryWarningThreshold then
+                -- Show a warning notification
+                Rayfield:Notify({
+                    Title = "🚨 High Memory Warning Reduce Spamming Options Use Ram Debug In Settings To View Current Lua Memory",
+                    Content = string.format("Lua memory usage is high!\nCurrent: %.2f MB\nThreshold: %d MB", luaMB, memoryWarningThreshold),
+                    Duration = 8
+                })
+            end
+
+            -- Output memory stats to the console with a 10-second delay
+            task.wait(10)  -- Wait for 10 seconds before printing
+            print(string.format("[Memory Monitor] Lua: %.2f MB | Peak: %.2f MB", luaMB, peakLuaMemory))
+
+            -- Wait for 5 seconds before the next memory check
+            task.wait(5)
+        end
+    end)
+end
+
+-- Automatically start memory monitoring when the script runs
+startMemoryMonitoring()
+
+SettingsTab:CreateButton({
+    Name = "Ram Info",
+    Callback = function()
+        local Stats = game:GetService("Stats")
+        local memoryUsage = Stats:GetTotalMemoryUsageMb()
+        local msg = string.format("Roblox is using %.2f MB of RAM", memoryUsage)
+
+        Rayfield:Notify({
+            Title = "Ram Used",
+            Content = msg,
+            Duration = 5
+        })
+    end
+})
+
+SettingsTab:CreateButton({
+    Name = "Clear Ram",
+    Callback = function()
+        local Stats = game:GetService("Stats")
+        local msgBeforeCleanup
+        local msgAfterCleanup
+
+        -- Get current memory usage before cleanup
+        local memoryBefore = Stats:GetTotalMemoryUsageMb()
+
+        -- Cleanup: Destroy unused objects (e.g., example models, parts, etc.)
+        -- You can add more specific cleanup if needed
+        local function cleanupUnusedObjects()
+            -- Example: Destroy all parts in Workspace that are not needed (be careful with this)
+            for _, obj in pairs(workspace:GetChildren()) do
+                if obj:IsA("Part") then
+                    obj:Destroy() -- Destroy part, customize this for more specific objects
+                end
+            end
+
+            -- Example: Destroy UI elements that might be consuming memory
+            if game.Players.LocalPlayer.PlayerGui:FindFirstChild("SomeUIElement") then
+                game.Players.LocalPlayer.PlayerGui.SomeUIElement:Destroy()
+            end
+        end
+
+        -- Run cleanup function
+        cleanupUnusedObjects()
+
+        -- Get memory after cleanup
+        local memoryAfter = Stats:GetTotalMemoryUsageMb()
+
+        -- Calculate the memory freed
+        local memoryFreed = memoryBefore - memoryAfter
+        msgBeforeCleanup = string.format("Before cleanup: %.2f MB", memoryBefore)
+        msgAfterCleanup = string.format("After cleanup: %.2f MB", memoryAfter)
+        local msg = string.format("Memory freed: %.2f MB", memoryFreed)
+
+        -- Send notification
+        Rayfield:Notify({
+            Title = "Ram Debug",
+            Content = msgBeforeCleanup .. "\n" .. msgAfterCleanup .. "\n" .. msg,
+            Duration = 5
+        })
+    end
+})
+
+
+
 -- 🌟 Create Slider for Graphics Quality
 SettingsTab:CreateSlider({
     Name = "Graphics Quality Level",
@@ -586,8 +753,8 @@ SettingsTab:CreateSlider({
 -- 🌟 Create Slider for FPS Cap
 SettingsTab:CreateSlider({
     Name = "FPS Cap",
-    Range = {30, 240},  -- FPS range from 30 to 240
-    Increment = 10,     -- Increment by 10 FPS
+    Range = {10, 240},  -- FPS range from 30 to 240
+    Increment = 5,     -- Increment by 10 FPS
     Suffix = " FPS",
     CurrentValue = 60,  -- Default value set to 60 FPS
     Callback = function(Value)
@@ -606,6 +773,13 @@ SettingsTab:CreateSlider({
                 Duration = 5
             })
         end
+    end
+})
+
+SettingsTab:CreateButton({
+    Name = "Destroy Gui",
+    Callback = function()
+        Rayfield:Destroy()  -- This will destroy the Rayfield object when the button is clicked
     end
 })
 
