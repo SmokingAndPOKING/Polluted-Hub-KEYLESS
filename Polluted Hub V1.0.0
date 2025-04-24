@@ -3,6 +3,19 @@
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local HttpService = game:GetService("HttpService")
+local settingsFile = "Saved Settings.json"
+
+local trackedElements = {}
+
+function registerElement(name, element, getFunc, setFunc)
+   trackedElements[name] = {
+      get = getFunc,
+      set = setFunc
+   }
+end
+
+
 local Window = Rayfield:CreateWindow({
    Name = "Polluted Hub BETA Build V1.3.0",
    Icon = 134220532775799,
@@ -15,7 +28,7 @@ local Window = Rayfield:CreateWindow({
 
    ConfigurationSaving = {
       Enabled = true,
-      FolderName = "Polluted Hub",
+      FolderName = "workspace",
       FileName = "Polluted"
    },
 
@@ -31,7 +44,7 @@ local Window = Rayfield:CreateWindow({
       Subtitle = "Key Validation",
       Note = "Join Discord For Key",
       FileName = "Key",
-      SaveKey = false,
+      SaveKey = true,
       GrabKeyFromSite = false,
       Key = {"Testing"}
    }
@@ -80,6 +93,39 @@ local Tab14 = Window:CreateTab("User Info", 4483362458)
 
 -- ℹ️ Info section
 Tab14:CreateSection("Info")
+
+Tab14:CreateButton({
+    Name = "💾 Save All Settings",
+    Callback = function()
+        local toSave = {}
+
+        -- Print current values of elements to debug
+        for name, el in pairs(trackedElements) do
+            local value = el.get()
+            print("Saving " .. name .. " with value: " .. tostring(value))
+            toSave[name] = value  -- Save the current value of each element
+        end
+
+        -- Write the settings to a file
+        writefile(settingsFile, HttpService:JSONEncode(toSave))
+        print("Settings saved!")
+    end
+})
+
+Tab14:CreateButton({
+   Name = "📂 Load All Settings",
+   Callback = function()
+      if isfile(settingsFile) then
+         local loaded = HttpService:JSONDecode(readfile(settingsFile))
+         for name, value in pairs(loaded) do
+            if trackedElements[name] then
+               trackedElements[name].set(value)
+            end
+         end
+      end
+   end
+})
+
 
 -- 👤 Username button (does nothing)
 Tab14:CreateButton({
@@ -175,27 +221,109 @@ local Tab16 = Window:CreateTab("Teleports", 4483362458)
 local Section16 = Tab16:CreateSection("Method Selection")
 
 local Dropdown = Tab16:CreateDropdown({          
-   Name = "Methods",
-   Options = {"Tween","Teleport"},
-   CurrentOption = {"Option 1"},
-   MultipleOptions = false, -- SET TO TRUE TO ENABLE MULTI SELECT
-   Flag = "Dropdown1", 
-   Callback = function(Options)
-   end,
+    Name = "Methods",
+    Options = {"Tween", "Teleport"},
+    CurrentOption = {"Tween"},
+    MultipleOptions = false,
+    Flag = "Dropdown1", 
+    Callback = function(Options)
+        -- You can add functionality here if needed
+        print("Selected method:", Options[1])
+    end,
 })
 
+wait(1)  -- Give the UI time to initialize
+
+-- Register the Dropdown
+registerElement("Methods", Dropdown, 
+    function() return Dropdown.CurrentOption[1] end,  -- Getter
+    function(v) Dropdown:Set({v}) end                 -- Setter
+)
 
 local Section16 = Tab16:CreateSection("Teleport To Player/Tween For Some Games")
 
-local Dropdown = Tab16:CreateDropdown({          
-   Name = "Teleport",
-   Options = {"Not Linked To Humanoid","Not Linked To Humanoid"},
-   CurrentOption = {"Option 1"},
-   MultipleOptions = false, -- SET TO TRUE TO ENABLE MULTI SELECT
-   Flag = "Dropdown1", 
-   Callback = function(Options)
-   end,
-})
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Safe dropdown holder
+local TeleportDropdown
+
+-- Get player names (excluding self optionally)
+local function GetPlayerNames()
+    local names = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(names, player.Name)
+        end
+    end
+    return names
+end
+
+-- Function to rebuild the dropdown
+local function UpdateTeleportDropdown()
+    local playerNames = GetPlayerNames()
+
+    -- Fallback if no players available
+    if #playerNames == 0 then
+        playerNames = {"No players available"}
+    end
+
+    -- Destroy old dropdown if it exists
+    if TeleportDropdown then
+        TeleportDropdown:Destroy()
+    end
+
+    -- ✅ Do NOT redeclare `TeleportDropdown` as local here
+    TeleportDropdown = Tab16:CreateDropdown({
+        Name = "Teleport To Player",
+        Options = playerNames,
+        CurrentOption = {playerNames[1]},
+        MultipleOptions = false,
+        Flag = "TeleportDropdown", 
+        Callback = function(Options)
+            local target = Players:FindFirstChild(Options[1])
+            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                local targetPos = target.Character.HumanoidRootPart.Position
+                LocalPlayer.Character:MoveTo(targetPos)
+            end
+        end,
+    })
+end -- ✅ This `end` was missing, which caused your earlier "expected end" error.
+
+-- Initial build
+UpdateTeleportDropdown()
+
+-- Wait a moment to ensure UI elements are initialized properly
+wait(1)
+
+-- Debug check: Print out if TeleportDropdown exists and has a valid CurrentOption
+if TeleportDropdown then
+    print("Teleport Dropdown created with Initial Option: " .. TeleportDropdown.CurrentOption[1])
+else
+    print("Error: Teleport Dropdown creation failed.")
+end
+
+-- Register the Dropdown only if it was created properly
+if TeleportDropdown and TeleportDropdown.CurrentOption then
+    registerElement("Teleport To Player", TeleportDropdown, 
+        function() 
+            print("Getting Teleport Dropdown selected option: " .. TeleportDropdown.CurrentOption[1])  -- Debug output
+            return TeleportDropdown.CurrentOption[1] 
+        end,
+        function(v) 
+            TeleportDropdown:Set({v})
+            print("Setting Teleport Dropdown selected option to: " .. v)  -- Debug output
+        end
+    )
+else
+    print("Teleport To Player Dropdown is not properly initialized. It cannot be registered.")
+end
+
+-- Live update on player join/leave
+Players.PlayerAdded:Connect(UpdateTeleportDropdown)
+Players.PlayerRemoving:Connect(UpdateTeleportDropdown)
+
+
 
 -- 🌟 Tab 0 - Main Menu
 local MainMenuTab = Window:CreateTab("Main Menu", 4483362458)
@@ -275,10 +403,12 @@ MainMenuTab:CreateButton({
 local Tab6 = Window:CreateTab("Character", 4483362458)
 local Section6 = Tab6:CreateSection("Character Controls")
 
+
 -- 🌟 Movement Speed Slider
 local movementSpeed = 16  -- Default speed value
 
-Tab6:CreateSlider({
+-- Create the slider and store it in a variable
+local speedSlider = Tab6:CreateSlider({
     Name = "🚶 Movement Speed",
     Range = {1, 100},  -- Set the range for the speed
     Increment = 1,     -- Increment value for the slider
@@ -290,6 +420,32 @@ Tab6:CreateSlider({
         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = movementSpeed
     end
 })
+
+-- Wait a moment to ensure UI elements are initialized properly
+wait(1)
+
+-- Debug check: Print out if speedSlider exists and has a valid CurrentValue
+if speedSlider then
+    print("SpeedSlider created with Initial Value: " .. speedSlider.CurrentValue)
+else
+    print("Error: SpeedSlider creation failed.")
+end
+
+-- Register the slider only if it was created properly
+if speedSlider and speedSlider.CurrentValue then
+    registerElement("Movement Speed", speedSlider, 
+        function() 
+            print("Getting SpeedSlider value: " .. speedSlider.CurrentValue)  -- Debug output
+            return speedSlider.CurrentValue 
+        end,  -- Getter
+        function(v) 
+            speedSlider:Set(v)
+            print("Setting SpeedSlider value to: " .. v)  -- Debug output
+        end   -- Setter
+    )
+else
+    print("SpeedSlider is not properly initialized. It cannot be registered.")
+end
 
 -- 🌟 Noclip Toggle
 local noclipEnabled = false  -- Default state for noclip toggle
@@ -327,10 +483,11 @@ Tab6:CreateToggle({
     end
 })
 
--- 🌟 Jump Power (Bubble Gum Games) Slider
-local jumpPowerBubbleGum = 50  -- Default jump power value for Bubble Gum Games
+-- Default jump power value for Bubble Gum Games
+local jumpPowerBubbleGum = 50  
 
-Tab6:CreateSlider({
+-- Create the Jump Power slider and store it in a variable (bgsjumpSlider)
+local bgsjumpSlider = Tab6:CreateSlider({
     Name = "Jump Power (Bubble Gum Games)",
     Range = {50, 100000000},  -- Set the range for jump power
     Increment = 50,           -- Increment value for the slider
@@ -345,10 +502,38 @@ Tab6:CreateSlider({
     end
 })
 
--- 🌟 Jump Power (All Games) Slider
-local jumpPowerAllGames = 50  -- Default jump power value for all games
+-- Wait a moment to ensure UI elements are initialized properly
+wait(1)
 
-Tab6:CreateSlider({
+-- Debug check: Print out if bgsjumpSlider exists and has a valid CurrentValue
+if bgsjumpSlider then
+    print("Jump Power Slider created with Initial Value: " .. bgsjumpSlider.CurrentValue)
+else
+    print("Error: Jump Power Slider creation failed.")
+end
+
+-- Register the slider only if it was created properly
+if bgsjumpSlider and bgsjumpSlider.CurrentValue then
+    registerElement("Jump Power (Bubble Gum Games)", bgsjumpSlider, 
+        function() 
+            print("Getting Jump Power value: " .. bgsjumpSlider.CurrentValue)  -- Debug output
+            return bgsjumpSlider.CurrentValue 
+        end,  -- Getter
+        function(v) 
+            bgsjumpSlider:Set(v)
+            print("Setting Jump Power value to: " .. v)  -- Debug output
+        end   -- Setter
+    )
+else
+    print("Jump Power Slider is not properly initialized. It cannot be registered.")
+end
+
+
+-- Default jump power value for all games
+local jumpPowerAllGames = 50  
+
+-- Create the Jump Power (All Games) slider and store it in a variable (jumpSlider)
+local jumpSlider = Tab6:CreateSlider({
     Name = "Jump Power (All Games)",
     Range = {1, 1000},  -- Set the range for jump power to 1 to 1000
     Increment = 1,      -- Increment value for the slider
@@ -360,6 +545,33 @@ Tab6:CreateSlider({
         game.Players.LocalPlayer.Character.Humanoid.JumpPower = jumpPowerAllGames
     end
 })
+
+-- Wait a moment to ensure UI elements are initialized properly
+wait(1)
+
+-- Debug check: Print out if jumpSlider exists and has a valid CurrentValue
+if jumpSlider then
+    print("Jump Power (All Games) Slider created with Initial Value: " .. jumpSlider.CurrentValue)
+else
+    print("Error: Jump Power (All Games) Slider creation failed.")
+end
+
+-- Register the slider only if it was created properly
+if jumpSlider and jumpSlider.CurrentValue then
+    registerElement("Jump Power (All Games)", jumpSlider, 
+        function() 
+            print("Getting Jump Power (All Games) value: " .. jumpSlider.CurrentValue)  -- Debug output
+            return jumpSlider.CurrentValue 
+        end,  -- Getter
+        function(v) 
+            jumpSlider:Set(v)
+            print("Setting Jump Power (All Games) value to: " .. v)  -- Debug output
+        end   -- Setter
+    )
+else
+    print("Jump Power (All Games) Slider is not properly initialized. It cannot be registered.")
+end
+
 
 -- 🌟 Rainbow Clothing Toggle
 local rainbowClothingEnabled = false  -- Default state for Rainbow Clothing
@@ -432,6 +644,20 @@ Tab6:CreateToggle({
             end
         end
     end
+})
+
+
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local Button = Tab6:CreateButton({
+    Name = "Remove Zoom Limit",
+    Callback = function()
+        player.CameraMaxZoomDistance = math.huge  -- No limit on zoom out
+        player.CameraMinZoomDistance = 0.5        -- Optional: allow zooming in very close
+        print("Zoom limit removed!")
+    end,
 })
 
 -- 🌟 Tab 7 - Custom Scripts (New Tab with 4 Buttons)
@@ -574,8 +800,318 @@ Tab13:CreateButton({ Name = "SlapBattles KeyLess", Callback = function() LoadScr
 
 -- 🌟 Tab 7- Settings
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
-local SettingsSection = SettingsTab:CreateSection("Performance")
+local SettingsSection = SettingsTab:CreateSection("Camera/Graphics")
 
+
+local freecamEnabled = false
+local freecamConn = nil
+local originalCharCFrame = nil
+local originalFogEnd = game.Lighting.FogEnd
+local originalFogStart = game.Lighting.FogStart
+local removedUIs = removedUIs or {}
+local originalAccessories = {}
+local savedShirtTemplate = ""
+local savedPantsTemplate = ""
+local lastFreecamDisabledPosition = nil  -- Save position when freecam is disabled
+
+SettingsTab:CreateButton({
+    Name = "FreeCam", 
+    Callback = function()
+        local Players = game:GetService("Players")
+        local UserInputService = game:GetService("UserInputService")
+        local RunService = game:GetService("RunService")
+        local Lighting = game:GetService("Lighting")
+
+        local player = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        local camera = workspace.CurrentCamera
+        local gui = player:WaitForChild("PlayerGui")
+
+        freecamEnabled = not freecamEnabled
+
+        local shirt = character:FindFirstChildOfClass("Shirt")
+        local pants = character:FindFirstChildOfClass("Pants")
+
+        if freecamEnabled then
+            originalCharCFrame = humanoidRootPart.CFrame
+
+            for _, ui in pairs(gui:GetChildren()) do
+                if not ui.Name:lower():match("rayfield") then
+                    local uiClone = ui:Clone()
+                    table.insert(removedUIs, uiClone)
+                    ui:Destroy()
+                end
+            end
+
+            Lighting.FogEnd = 1e6
+            Lighting.FogStart = 1e6
+            humanoidRootPart.Anchored = true
+
+            originalAccessories = {}
+            for _, part in ipairs(character:GetChildren()) do
+                if part:IsA("Accessory") then
+                    table.insert(originalAccessories, part)
+                    part.Parent = nil
+                end
+            end
+
+            -- Save and hide clothing
+            if shirt then
+                savedShirtTemplate = shirt.ShirtTemplate
+                shirt.ShirtTemplate = ""
+            end
+            if pants then
+                savedPantsTemplate = pants.PantsTemplate
+                pants.PantsTemplate = ""
+            end
+
+            -- Hide parts
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = 1
+                    part.LocalTransparencyModifier = 1
+                    part.CanCollide = false
+                elseif part:IsA("Decal") or part:IsA("Texture") then
+                    part.Transparency = 1
+                end
+            end
+
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            end
+
+            camera.CameraType = Enum.CameraType.Scriptable
+            local camCF = camera.CFrame
+            local keysDown = {}
+            local speed = 30
+            local yaw, pitch = 0, 0
+            local rightMouseDown = false
+            local ctrlHeld = false
+
+            local function updateDirection()
+                return Vector3.new(
+                    (keysDown["D"] and 1 or 0) - (keysDown["A"] and 1 or 0),
+                    0,
+                    (keysDown["W"] and 1 or 0) - (keysDown["S"] and 1 or 0)
+                )
+            end
+
+            local moveDirection = Vector3.zero
+
+            UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                if gameProcessed then return end
+                if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    rightMouseDown = true
+                    UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
+                end
+                keysDown[input.KeyCode.Name] = true
+                moveDirection = updateDirection()
+                if input.KeyCode == Enum.KeyCode.LeftControl then
+                    ctrlHeld = true
+                    speed = 60
+                end
+            end)
+
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    rightMouseDown = false
+                    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+                end
+                keysDown[input.KeyCode.Name] = false
+                moveDirection = updateDirection()
+                if input.KeyCode == Enum.KeyCode.LeftControl then
+                    ctrlHeld = false
+                    speed = 30
+                end
+            end)
+
+            freecamConn = RunService:BindToRenderStep("FreeCamUpdate", Enum.RenderPriority.Camera.Value + 1, function(dt)
+                if rightMouseDown then
+                    local delta = UserInputService:GetMouseDelta()
+                    yaw = yaw - delta.X * 0.002
+                    pitch = math.clamp(pitch - delta.Y * 0.002, -math.pi/2 + 0.1, math.pi/2 - 0.1)
+                end
+
+                local direction = CFrame.Angles(0, yaw, 0) * CFrame.Angles(pitch, 0, 0)
+                camCF = CFrame.new(camCF.Position) * direction
+                local moveVec = ((camCF.RightVector * moveDirection.X) + (camCF.LookVector * moveDirection.Z)) * dt * speed
+                camCF = camCF + moveVec
+                camera.CFrame = camCF
+                humanoidRootPart.CFrame = camCF * CFrame.new(0, -5, 0)
+            end)
+
+            Rayfield:Notify({
+                Title = "FreeCam Enabled",
+                Content = "Streaming fixed. Character invisible. UI hidden. Right click to look.",
+                Duration = 5
+            })
+
+        else
+            -- Save the position of the character before disabling freecam
+            lastFreecamDisabledPosition = humanoidRootPart.Position
+
+            RunService:UnbindFromRenderStep("FreeCamUpdate")
+            camera.CameraType = Enum.CameraType.Custom
+            humanoidRootPart.Anchored = false
+
+            -- **Trigger the character death here**
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.Health = 0  -- Simulate death by setting health to 0
+            end
+
+            Lighting.FogEnd = originalFogEnd
+            Lighting.FogStart = originalFogStart
+
+            -- Restore visibility
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = 0
+                    part.LocalTransparencyModifier = 0
+                    part.CanCollide = true
+                elseif part:IsA("Decal") or part:IsA("Texture") then
+                    part.Transparency = 0
+                end
+            end
+
+            -- Restore clothing
+            local shirt = character:FindFirstChildOfClass("Shirt")
+            local pants = character:FindFirstChildOfClass("Pants")
+
+            if shirt and savedShirtTemplate ~= "" then
+                shirt.ShirtTemplate = savedShirtTemplate
+            end
+            if pants and savedPantsTemplate ~= "" then
+                pants.PantsTemplate = savedPantsTemplate
+            end
+
+            -- Restore accessories
+            for _, accessory in ipairs(originalAccessories) do
+                accessory.Parent = character
+            end
+            originalAccessories = {}
+
+            -- Restore UI
+            for _, uiClone in pairs(removedUIs) do
+                if uiClone and uiClone.Parent == nil then
+                    local success, err = pcall(function()
+                        uiClone.Parent = gui
+                    end)
+                    if not success then
+                        warn("Failed to restore UI: " .. tostring(err))
+                    end
+                end
+            end
+            removedUIs = {}
+
+            -- Wait until the character respawns
+            player.CharacterAdded:Wait()
+
+            -- After respawn, set the character's position to the last saved position
+            local newCharacter = player.Character
+            local newHumanoidRootPart = newCharacter:WaitForChild("HumanoidRootPart")
+            if lastFreecamDisabledPosition then
+                newHumanoidRootPart.CFrame = CFrame.new(lastFreecamDisabledPosition)
+            end
+
+            Rayfield:Notify({
+                Title = "FreeCam Disabled",
+                Content = "Streaming restored. Character visible. UI restored.",
+                Duration = 5
+            })
+        end
+    end
+})
+
+
+
+
+local realisticGraphicsEnabled = false
+local realismPercent = 100 -- default to full realism
+local bloomEffect
+local colorCorrectionEffect
+local depthOfFieldEffect
+
+-- Save original lighting
+local originalLighting = {
+    Ambient = game.Lighting.Ambient,
+    Brightness = game.Lighting.Brightness,
+    ColorShift_Bottom = game.Lighting.ColorShift_Bottom,
+    ColorShift_Top = game.Lighting.ColorShift_Top,
+    FogEnd = game.Lighting.FogEnd,
+    FogStart = game.Lighting.FogStart,
+}
+
+-- Apply effects
+local function applyRealisticGraphics()
+    game.Lighting.Ambient = Color3.fromRGB(90, 90, 90)
+    game.Lighting.Brightness = 1.8
+    game.Lighting.ColorShift_Bottom = Color3.fromRGB(40, 40, 40)
+    game.Lighting.ColorShift_Top = Color3.fromRGB(120, 120, 120)
+    game.Lighting.FogEnd = 2000
+    game.Lighting.FogStart = 800
+
+    bloomEffect = Instance.new("BloomEffect")
+    bloomEffect.Intensity = 0.15
+    bloomEffect.Size = 18
+    bloomEffect.Threshold = 1
+    bloomEffect.Parent = game.Lighting
+
+    colorCorrectionEffect = Instance.new("ColorCorrectionEffect")
+    colorCorrectionEffect.Brightness = 0.02
+    colorCorrectionEffect.Contrast = 0.1
+    colorCorrectionEffect.Saturation = 0.1
+    colorCorrectionEffect.TintColor = Color3.fromRGB(255, 245, 220)
+    colorCorrectionEffect.Parent = game.Lighting
+
+    depthOfFieldEffect = Instance.new("DepthOfFieldEffect")
+    depthOfFieldEffect.FocusDistance = 200
+    depthOfFieldEffect.InFocusRadius = 120
+    depthOfFieldEffect.FarIntensity = 0.05
+    depthOfFieldEffect.NearIntensity = 0.05
+    depthOfFieldEffect.Parent = game.Lighting
+end
+
+-- Remove effects
+local function restoreDefaultGraphics()
+    game.Lighting.Ambient = originalLighting.Ambient
+    game.Lighting.Brightness = originalLighting.Brightness
+    game.Lighting.ColorShift_Bottom = originalLighting.ColorShift_Bottom
+    game.Lighting.ColorShift_Top = originalLighting.ColorShift_Top
+    game.Lighting.FogEnd = originalLighting.FogEnd
+    game.Lighting.FogStart = originalLighting.FogStart
+
+    if bloomEffect then bloomEffect:Destroy() end
+    if colorCorrectionEffect then colorCorrectionEffect:Destroy() end
+    if depthOfFieldEffect then depthOfFieldEffect:Destroy() end
+end
+
+-- Toggle Button Only
+SettingsTab:CreateButton({
+    Name = "Toggle Realistic Graphics",
+    Callback = function()
+        realisticGraphicsEnabled = not realisticGraphicsEnabled
+        if realisticGraphicsEnabled then
+            applyRealisticGraphics()
+            Rayfield:Notify({
+                Title = "Realistic Graphics Enabled",
+                Content = "Realism enabled, auto FPS will still work.",
+                Duration = 6
+            })
+        else
+            restoreDefaultGraphics()
+            Rayfield:Notify({
+                Title = "Realistic Graphics Disabled",
+                Content = "Visual effects turned off.",
+                Duration = 5
+            })
+        end
+    end
+})
+
+local SettingsSection = SettingsTab:CreateSection("Performance")
 
 
 local peakLuaMemory = 0
@@ -583,6 +1119,60 @@ local monitoring = false
 
 -- Threshold in MB (tweak this!)
 local memoryWarningThreshold = 100
+
+SettingsTab:CreateButton({
+    Name = "Force Emote (Any)",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+
+        if not animator then
+            -- Create the Animator if it doesn't exist
+            animator = Instance.new("Animator")
+            animator.Parent = humanoid
+        end
+
+        -- Clear current animations
+        for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+            track:Stop()
+        end
+
+        -- Emote's animation ID (example: use marketplace animation IDs)
+        local emoteID = "rbxassetid://16572756230"  -- Replace with any emote ID from the marketplace (Stylish, Wave, etc.)
+
+        -- Function to load and play the animation
+        local function loadAndPlayEmote(animId)
+            local anim = Instance.new("Animation")
+            anim.AnimationId = animId
+            
+            -- Check if animation ID is valid
+            if not animId or animId == "" then
+                warn("Invalid AnimationId!")
+                return
+            end
+
+            -- Load animation into the animator
+            local track = animator:LoadAnimation(anim)
+            if not track then
+                warn("Failed to load animation.")
+                return
+            end
+
+            -- Customize track properties
+            track.Priority = Enum.AnimationPriority.Action
+            track.Looped = false  -- Or set to true if you want the animation to repeat
+            track:Play()
+            print("Playing emote with AnimationId:", animId)
+        end
+
+        -- Force the emote to play (using marketplace animation ID)
+        loadAndPlayEmote(emoteID)
+    end
+})
+
+
 
 SettingsTab:CreateButton({
     Name = "Ram Debug",
@@ -718,10 +1308,8 @@ SettingsTab:CreateButton({
     end
 })
 
-
-
--- 🌟 Create Slider for Graphics Quality
-SettingsTab:CreateSlider({
+-- Create the Graphics Quality Level slider and store it in a variable (GraphicsSlider)
+local GraphicsSlider = SettingsTab:CreateSlider({
     Name = "Graphics Quality Level",
     Range = {1, 6},  -- Corresponding to the 6 quality levels in Roblox
     Increment = 1,
@@ -752,11 +1340,38 @@ SettingsTab:CreateSlider({
     end
 })
 
--- 🌟 Create Slider for FPS Cap
-SettingsTab:CreateSlider({
+-- Wait a moment to ensure UI elements are initialized properly
+wait(1)
+
+-- Debug check: Print out if GraphicsSlider exists and has a valid CurrentValue
+if GraphicsSlider then
+    print("Graphics Quality Slider created with Initial Value: " .. GraphicsSlider.CurrentValue)
+else
+    print("Error: Graphics Quality Slider creation failed.")
+end
+
+-- Register the slider only if it was created properly
+if GraphicsSlider and GraphicsSlider.CurrentValue then
+    registerElement("Graphics Quality Level", GraphicsSlider, 
+        function() 
+            print("Getting Graphics Quality Level value: " .. GraphicsSlider.CurrentValue)  -- Debug output
+            return GraphicsSlider.CurrentValue 
+        end,  -- Getter
+        function(v) 
+            GraphicsSlider:Set(v)
+            print("Setting Graphics Quality Level value to: " .. v)  -- Debug output
+        end   -- Setter
+    )
+else
+    print("Graphics Quality Level Slider is not properly initialized. It cannot be registered.")
+end
+
+
+-- Create the FPS Cap slider and store it in a variable (fpsSlider)
+local fpsSlider = SettingsTab:CreateSlider({
     Name = "FPS Cap",
-    Range = {10, 240},  -- FPS range from 30 to 240
-    Increment = 5,     -- Increment by 10 FPS
+    Range = {10, 240},  -- FPS range from 10 to 240
+    Increment = 5,      -- Increment by 5 FPS
     Suffix = " FPS",
     CurrentValue = 60,  -- Default value set to 60 FPS
     Callback = function(Value)
@@ -777,6 +1392,33 @@ SettingsTab:CreateSlider({
         end
     end
 })
+
+-- Wait a moment to ensure UI elements are initialized properly
+wait(1)
+
+-- Debug check: Print out if fpsSlider exists and has a valid CurrentValue
+if fpsSlider then
+    print("FPS Cap Slider created with Initial Value: " .. fpsSlider.CurrentValue)
+else
+    print("Error: FPS Cap Slider creation failed.")
+end
+
+-- Register the slider only if it was created properly
+if fpsSlider and fpsSlider.CurrentValue then
+    registerElement("FPS Cap", fpsSlider, 
+        function() 
+            print("Getting FPS Cap value: " .. fpsSlider.CurrentValue)  -- Debug output
+            return fpsSlider.CurrentValue 
+        end,  -- Getter
+        function(v) 
+            fpsSlider:Set(v)
+            print("Setting FPS Cap value to: " .. v)  -- Debug output
+        end   -- Setter
+    )
+else
+    print("FPS Cap Slider is not properly initialized. It cannot be registered.")
+end
+
 
 SettingsTab:CreateButton({
     Name = "Destroy Gui",
@@ -846,8 +1488,8 @@ SettingsTab:CreateInput({
     end
 })
 
--- 🌟 Create Slider for Volume Control
-SettingsTab:CreateSlider({
+-- Create the Volume Control slider and store it in a variable (volumedSlider)
+local volumedSlider = SettingsTab:CreateSlider({
     Name = "Volume",
     Range = {0, 100},  -- Volume range from 0 to 100
     Increment = 1,     -- Increment by 1
@@ -870,6 +1512,33 @@ SettingsTab:CreateSlider({
         })
     end
 })
+
+-- Wait a moment to ensure UI elements are initialized properly
+wait(1)
+
+-- Debug check: Print out if volumedSlider exists and has a valid CurrentValue
+if volumedSlider then
+    print("Volume Slider created with Initial Value: " .. volumedSlider.CurrentValue)
+else
+    print("Error: Volume Slider creation failed.")
+end
+
+-- Register the slider only if it was created properly
+if volumedSlider and volumedSlider.CurrentValue then
+    registerElement("Volume", volumedSlider, 
+        function() 
+            print("Getting Volume value: " .. volumedSlider.CurrentValue)  -- Debug output
+            return volumedSlider.CurrentValue 
+        end,  -- Getter
+        function(v) 
+            volumedSlider:Set(v)
+            print("Setting Volume value to: " .. v)  -- Debug output
+        end   -- Setter
+    )
+else
+    print("Volume Slider is not properly initialized. It cannot be registered.")
+end
+
 
 -- 🌟 Create Stop Button to Stop the Music
 SettingsTab:CreateButton({
@@ -1218,3 +1887,114 @@ task.spawn(function()
         end
     end
 end)
+
+local Tab20 = Window:CreateTab("Executor Discord Links", 4483362458)
+
+Tab20:CreateSection("Paid")
+
+Tab20:CreateButton({
+    Name = "📨 AWP👑",
+    Callback = function()
+        setclipboard("https://discord.gg/ggawp") -- Replace with your real invite
+        Rayfield:Notify({
+            Title = "📋 Link Copied",
+            Content = "AWP👑 invite copied to clipboard!",
+            Duration = 4
+        })
+    end
+})
+
+Tab20:CreateButton({
+    Name = "📨 Wave",
+    Callback = function()
+        setclipboard("") -- Replace with your real invite
+        Rayfield:Notify({
+            Title = "📋 Link Copied",
+            Content = "Wave Invite Invalid Wait For New Discord",
+            Duration = 4
+        })
+    end
+})
+
+Tab20:CreateButton({
+    Name = "📨 SeliWare",
+    Callback = function()
+        setclipboard("") -- Replace with your real invite
+        Rayfield:Notify({
+            Title = "📋 Link Copied",
+            Content = "SeliWare invite copied to clipboard!",
+            Duration = 4
+        })
+    end
+})
+
+Tab20:CreateButton({
+    Name = "📨 SIRHURT",
+    Callback = function()
+        setclipboard("https://discord.com/invite/CPKvWTgFdV ") -- Replace with your real invite
+        Rayfield:Notify({
+            Title = "📋 Link Copied",
+            Content = "SIRHURT invite copied to clipboard!",
+            Duration = 4
+        })
+    end
+})
+
+Tab20:CreateButton({
+    Name = "📨 Potassium",
+    Callback = function()
+        setclipboard("https://discord.com/invite/potassium") -- Replace with your real invite
+        Rayfield:Notify({
+            Title = "📋 Link Copied",
+            Content = "Potassium invite copied to clipboard!",
+            Duration = 4
+        })
+    end
+})
+
+
+Tab20:CreateSection("Free")
+
+Tab20:CreateButton({
+    Name = "📨 SWIFT",
+    Callback = function()
+        setclipboard("https://discord.gg/getswiftgg") -- Replace with your real invite
+        Rayfield:Notify({
+            Title = "📋 Link Copied",
+            Content = "Swift invite copied to clipboard!",
+            Duration = 4
+        })
+    end
+})
+
+Tab20:CreateButton({
+    Name = "📨 Xeno",
+    Callback = function()
+        setclipboard("https://discord.gg/xeno-now") -- Replace with your real invite
+        Rayfield:Notify({
+            Title = "📋 Link Copied",
+            Content = "Xeno invite copied to clipboard!",
+            Duration = 4
+        })
+    end
+})
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+player.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid").WalkSpeed = movementSpeed
+    character:WaitForChild("Humanoid").JumpPower = jumpPowerAllGames
+
+    if noclipEnabled then
+        game:GetService("RunService").Heartbeat:Connect(function()
+            if noclipEnabled and character then
+                for _, part in pairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    end -- ✅ this was likely the missing `end`
+end) -- ✅ closes the CharacterAdded:Connect
